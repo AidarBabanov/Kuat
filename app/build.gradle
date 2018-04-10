@@ -29,4 +29,5 @@ dependencies {
 
     implementation 'com.github.bmarrdev:android-DecoView-charting:v1.2'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
+    implementation 'com.macroyau:thingspeakandroid:0.2.2'
 }

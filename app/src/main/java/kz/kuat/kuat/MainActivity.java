@@ -1,9 +1,13 @@
 package kz.kuat.kuat;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -14,17 +18,44 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.DataSet;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.hookedonplay.decoviewlib.DecoView;
 import com.hookedonplay.decoviewlib.charts.SeriesItem;
 import com.hookedonplay.decoviewlib.events.DecoEvent;
+import com.macroyau.thingspeakandroid.ThingSpeakChannel;
+import com.macroyau.thingspeakandroid.model.ChannelFeed;
+import com.macroyau.thingspeakandroid.model.Feed;
+
+import org.w3c.dom.Text;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, ThingSpeakConnection.ChannelFeedUpdateListener {
 
     TextView speedValue;
     DecoView arcView;
     int series1Index;
+
+    LineChart mChart;
+
+    ConstraintLayout chartLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +63,18 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        mChart = findViewById(R.id.lineChart);
+        chartLayout = findViewById(R.id.chartLayout);
+
+        chartLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent myIntent = new Intent(chartLayout.getContext(), ChartsActivity.class);
+                startActivityForResult(myIntent, 0);
+            }
+        });
+
 //        Circle meter start
         speedValue = findViewById(R.id.speedValue);
 
@@ -103,6 +146,11 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        //Loading data from ThingSpeak
+        ThingSpeakConnection thingSpeakConnection = ThingSpeakConnection.getInstance();
+        thingSpeakConnection.setChannelFeedUpdateListener(this);
+        thingSpeakConnection.loadChannelFeed();
     }
 
     @Override
@@ -167,4 +215,45 @@ public class MainActivity extends AppCompatActivity
         super.onStart();
     }
 
+    @Override
+    public void onChannelFeedUpdated(long channelId, String channelName, ChannelFeed channelFeed) {
+        ArrayList<Entry> entries = new ArrayList<>();
+        for (Feed feed : channelFeed.getFeeds()) {
+            Float xValue = Long.valueOf(feed.getCreatedAt().getTime()).floatValue();
+            Float yValue = Float.parseFloat(feed.getField2());
+            entries.add(new Entry(xValue, yValue));
+        }
+        updateDataSet(entries);
+    }
+
+    public void updateDataSet(List<Entry> entries) {
+        LineDataSet dataSet = new LineDataSet(entries, "field2");
+        LineData data = new LineData(dataSet);
+        mChart.setData(data);
+
+        XAxis xAxis = mChart.getXAxis();
+        xAxis.setValueFormatter(new DateValueFormatter());
+        xAxis.setLabelCount(3);
+
+
+        Description description = new Description();
+        description.setText("");
+        mChart.getLegend().setEnabled(false);
+        mChart.setTouchEnabled(false);
+        mChart.setDescription(description);
+        mChart.notifyDataSetChanged();
+        mChart.invalidate();
+    }
+
+    public class DateValueFormatter implements IAxisValueFormatter {
+        @Override
+        public String getFormattedValue(float value, AxisBase axis) {
+            // Simple version. You should use a DateFormatter to specify how you want to textually represent your date.
+            String pattern = "HH:mm:ss dd.MM.yy";
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+            Date date = new Date(new Float(value).longValue());
+            String formattedDate = simpleDateFormat.format(date);
+            return formattedDate;
+        }
+    }
 }
