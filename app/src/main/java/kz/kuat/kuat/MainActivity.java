@@ -43,11 +43,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, ThingSpeakConnection.ChannelFeedUpdateListener {
+        implements NavigationView.OnNavigationItemSelectedListener, ThingSpeakChannel.ChannelFeedUpdateListener {
 
     TextView speedValue;
     DecoView arcView;
@@ -215,17 +216,6 @@ public class MainActivity extends AppCompatActivity
         super.onStart();
     }
 
-    @Override
-    public void onChannelFeedUpdated(long channelId, String channelName, ChannelFeed channelFeed) {
-        ArrayList<Entry> entries = new ArrayList<>();
-        for (Feed feed : channelFeed.getFeeds()) {
-            Float xValue = Long.valueOf(feed.getCreatedAt().getTime()).floatValue();
-            Float yValue = Float.parseFloat(feed.getField2());
-            entries.add(new Entry(xValue, yValue));
-        }
-        updateDataSet(entries);
-    }
-
     public void updateDataSet(List<Entry> entries) {
         LineDataSet dataSet = new LineDataSet(entries, "field2");
         LineData data = new LineData(dataSet);
@@ -245,15 +235,27 @@ public class MainActivity extends AppCompatActivity
         mChart.invalidate();
     }
 
+    @Override
+    public void onChannelFeedUpdated(long channelId, String channelName, ChannelFeed channelFeed) {
+        ArrayList<Entry> entries = new ArrayList<>();
+        for (Feed feed : channelFeed.getFeeds()) {
+            if (feed.getField4() != null) {
+                Float xValue = Long.valueOf(feed.getCreatedAt().getTime()).floatValue();
+                Float yValue = Float.parseFloat(feed.getField4());
+                entries.add(new Entry(xValue, yValue));
+            }
+        }
+        updateDataSet(entries);
+    }
+
     public class DateValueFormatter implements IAxisValueFormatter {
         @Override
         public String getFormattedValue(float value, AxisBase axis) {
             // Simple version. You should use a DateFormatter to specify how you want to textually represent your date.
             String pattern = "HH:mm:ss dd.MM.yy";
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-            Date date = new Date(new Float(value).longValue());
-            String formattedDate = simpleDateFormat.format(date);
-            return formattedDate;
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern, new Locale("ru"));
+            Date date = new Date(Float.valueOf(value).longValue());
+            return simpleDateFormat.format(date);
         }
     }
 }
