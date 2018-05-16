@@ -11,9 +11,10 @@
     <string name="xaxis">xAxis</string>
     <string name="yaxis">yAxis</string>
     <string name="_100">100</string>
-    <string name="speed">Скорость</string>
-    <string name="tg_month">тг/мес</string>
-    <string name="help">Подсказки</string>
+    <string name="speed">Speed</string>
+    <string name="tg_month">tg/month</string>
+    <string name="help">Helpers</string>
     <string name="power">Power</string>
-    <string name="time">Time</string>
+    <string name="time">Время</string>
+    <string name="title_activity_meters_list">MetersListActivity</string>
 </resources>
