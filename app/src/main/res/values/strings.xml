@@ -17,4 +17,8 @@
     <string name="power">Power</string>
     <string name="time">Время</string>
     <string name="title_activity_meters_list">MetersListActivity</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="text">some_text</string>
 </resources>

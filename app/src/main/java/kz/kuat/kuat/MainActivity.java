@@ -129,15 +129,7 @@ public class MainActivity extends AppCompatActivity
             }
         }, 12000);
         arcView.addEvent(new DecoEvent.Builder(10).setIndex(series1Index).setDelay(12000).build());
-//        Circle meter end
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -149,9 +141,9 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         //Loading data from ThingSpeak
-        ThingSpeakConnection thingSpeakConnection = ThingSpeakConnection.getInstance();
-        thingSpeakConnection.setChannelFeedUpdateListener(this);
-        thingSpeakConnection.loadChannelFeed();
+//        ThingSpeakConnection thingSpeakConnection = ThingSpeakConnection.getInstance();
+//        thingSpeakConnection.setChannelFeedUpdateListener(this);
+//        thingSpeakConnection.loadChannelFeed();
     }
 
     @Override
